@@ -1,5 +1,3 @@
-import java.util.*
-
 enum class DesertDirection {
     L, R
 }
@@ -60,31 +58,21 @@ fun main() {
     }
 
     fun part2(desert: Desert): Long {
-        val startingNodes = desert.maps.filter { it.source.endsWith("A") }.map { it.source }
-        val queue: Queue<List<String>> = LinkedList()
-        val visited = mutableSetOf<List<String>>()
-        queue.add(startingNodes)
-        visited.add(startingNodes)
-
+        val startingNodes = desert.maps.filter { it.source.endsWith("A") }.map { it.source }.toMutableSet()
         var steps = 0L
         val directionGenerator = desert.generateDirections()
 
-        while (queue.isNotEmpty()) {
-            for (i in queue.indices) {
-                val current = queue.poll()
-                if (current.all { it.endsWith("Z") }) return steps
+        while (!startingNodes.all { it.endsWith("Z") }) {
+            val nextDirection = directionGenerator.next()
+            val nextNodes = mutableSetOf<String>()
 
-                val nextDirection = directionGenerator.next()
-                val nextNodes = current.map { node ->
-                    val nextNode = desert.index[node]!!
-                    if (nextDirection == DesertDirection.L) nextNode.left else nextNode.right
-                }
-
-                if (nextNodes !in visited) {
-                    queue.add(nextNodes)
-                    visited.add(nextNodes)
-                }
+            for (node in startingNodes) {
+                val nextNode = desert.index[node]!!
+                nextNodes.add(if (nextDirection == DesertDirection.L) nextNode.left else nextNode.right)
             }
+
+            startingNodes.clear()
+            startingNodes.addAll(nextNodes)
             steps++
         }
 
