@@ -1,3 +1,5 @@
+import java.io.File
+
 enum class PipeKind {
     VERTICAL, HORIZONTAL, NE, NW, SW, SE, EMPTY, START
 }
@@ -33,6 +35,22 @@ fun main() {
         }
 
         return Maze(pipes)
+    }
+
+    fun printMazeToFile(maze: Maze, filename: String) {
+        File(filename).bufferedWriter().use { writer ->
+            val maxX = maze.pipes.maxOf { it.position.x }
+            val maxY = maze.pipes.maxOf { it.position.y }
+
+            for (y in 0..maxY) {
+                for (x in 0..maxX) {
+                    val pipe = maze.reverseIndex[Point(x, y)]
+                    val charToPrint = if (pipe == null || pipe.pipeKind == PipeKind.EMPTY) ' ' else '*'
+                    writer.write(charToPrint.toString())
+                }
+                writer.newLine()
+            }
+        }
     }
 
     fun getNextPipe(currentPipe: MazePipe, maze: Maze, previousPipe: MazePipe? = null): MazePipe? {
@@ -95,7 +113,14 @@ fun main() {
         return (loopLengths.max() + 1) / 2
     }
 
+    fun part2(): Int {
+        return File("output_final.txt").readText().count { it == 'I' }
+    }
+
     val fileInput = readInput("Day10")
+    val maze = parseInput(fileInput)
+    printMazeToFile(maze, "output.txt")
 
     println(part1(parseInput(fileInput)))
+    println(part2())
 }
